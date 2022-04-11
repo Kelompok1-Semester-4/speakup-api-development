@@ -17,14 +17,15 @@ class UserController extends Controller
     {
         $id = $request->input('id');
         $role_id = $request->input('role_id');
-        $user = DetailUser::with('user')->get();
+        
         if ($id) {
-            return $user->where('user_id', $id)->first();
+            return ResponseFormatter::success(User::find($id));
         }
+
         if ($role_id) {
-            return $user->where('role_id', $role_id)->with('user')->get();
+            // get detail user data by role_id
+            return User::with('detailUser')->where('role_id', $role_id)->get();
         }
-        return $user;
     }
 
     public function register(Request $request)
@@ -73,8 +74,8 @@ class UserController extends Controller
 
             $user = User::where('email', $request->email)->first();
             $detailUser = DetailUser::where('user_id', $user->id)->first();
-            
-            if(!password_verify($request->password, $user->password)) {
+
+            if (!password_verify($request->password, $user->password)) {
                 return ResponseFormatter::error('Password is incorrect', 'Login Failed');
             }
 

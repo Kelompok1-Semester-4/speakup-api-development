@@ -26,7 +26,7 @@ class CourseController extends Controller
         }
 
         if ($id) {
-            return Course::with(['detailCourse', 'detailUser'])->find($id);
+            return Course::where('id', $id)->with(['detailCourse', 'detailUser'])->first();
         }
 
         if ($course_type_id) {
