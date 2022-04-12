@@ -15,6 +15,7 @@ class DiaryController extends Controller
         $id = $request->input('id');
         $diary_type_id = $request->input('diary_type_id');
         $search = $request->input('search');
+        $user_id = $request->input('user_id');
 
         if ($id) {
             return Diary::with(['diaryType', 'detailUser'])->find($id);
@@ -89,7 +90,7 @@ class DiaryController extends Controller
             $diary->update($request->all());
             return ResponseFormatter::success($diary, 'Diary updated successfully');
         } catch (Exception $th) {
-            return ResponseFormatter::error($th->getMessage()); 
+            return ResponseFormatter::error($th->getMessage());
         }
     }
 

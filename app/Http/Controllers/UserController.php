@@ -110,7 +110,7 @@ class UserController extends Controller
                 'user' => $user,
                 'token_type' => 'Bearer',
                 'detail_user' => $detailUser,
-            ], 'Login Success');
+            ], 'Login Success')->withCookie('jwt', $token_result, 60 * 24 * 30);
         } catch (Exception $th) {
             return ResponseFormatter::error($th->getMessage(), 'Login Failed');
         }
