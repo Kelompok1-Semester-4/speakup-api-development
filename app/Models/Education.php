@@ -13,11 +13,16 @@ class Education extends Model
         'detail_user_id',
         'level',
         'institution',
-        'address',
+        'institution_address',
         'major',
         'study_field',
         'graduation_year',
         'gpa',
         'file_url',
     ];
+
+    public function detailUser()
+    {
+        return $this->belongsTo(DetailUser::class);
+    }
 }

@@ -20,7 +20,7 @@ class DetailCourseFactory extends Factory
             'course_id' => $this->faker->numberBetween(1, 10),
             'title' => $this->faker->sentence(2),
             'description' => $this->faker->text,
-            'video_link' => $this->faker->url,
+            'video_link' => 'fNHAQmkHkAQ',
             'cover_image' => 'https://picsum.photos/300/300',
             'duration' => $this->faker->time('H:i'),
         ];

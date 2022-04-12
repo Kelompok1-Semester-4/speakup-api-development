@@ -20,10 +20,10 @@ class EducationFactory extends Factory
             'detail_user_id' => $this->faker->numberBetween(1, 10),
             'level' => $this->faker->randomElement(['SMA', 'SMK', 'S1', 'S2', 'S3']),
             'institution' => $this->faker->company,
-            'address' => $this->faker->address,
+            'institution_address' => $this->faker->address,
             'major' => $this->faker->jobTitle,
             'study_field' => $this->faker->jobTitle,
-            'graduation_year' => $this->faker->dateTimeBetween('-30 years', 'now')->format('Y-m-d'),
+            'graduation_year' => $this->faker->year,
             'gpa' => $this->faker->randomFloat(2, 3, 4),
             'file_url' => $this->faker->url,
         ];

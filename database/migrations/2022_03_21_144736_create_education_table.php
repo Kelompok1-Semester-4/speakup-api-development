@@ -18,12 +18,12 @@ return new class extends Migration
             $table->integer('detail_user_id')->unsigned();
             $table->enum('level', ['SMA', 'SMK', 'S1', 'S2', 'S3']);
             $table->string('institution');
-            $table->string('address');
+            $table->string('institution_address');
             $table->string('major');
             $table->string('study_field')->nullable();
-            $table->date('graduation_year');
+            $table->string('graduation_year');
             $table->string('gpa');
-            $table->longText('file_url')->nullable();
+            $table->longText('file_url');
             $table->timestamps();
         });
     }

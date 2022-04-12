@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helpers\ResponseFormatter;
 use App\Models\DetailUser;
+use App\Models\Education;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
@@ -37,7 +38,7 @@ class UserController extends Controller
                 'birth' => 'required',
                 'phone' => 'required|string',
                 'address' => 'required',
-                'email' => 'required|email:rfc,dns|unique:users',
+                'email' => 'required|unique:users',
                 'password' => ['required', new Password],
                 'role_id' => 'required',
             ]);
@@ -51,7 +52,30 @@ class UserController extends Controller
             $user = User::with('detailUser')->where('email', $request->email)->first();
             $token_result = $user->createToken('Personal Access Token')->plainTextToken;
 
-            DetailUser::create($request->all());
+            // insert data to detail_user table
+            DetailUser::create(array_merge($request->all(), [
+                'user_id' => $user->id,
+            ]));
+
+            $detailUser = DetailUser::where('user_id', $user->id)->first();
+
+            // insert data to education table
+            if ($request->role_id == 2) {
+                $request->validate([
+                    'level' => 'required',
+                    'institution' => 'required',
+                    'institution_address' => 'required',
+                    'major' => 'required',
+                    'study_field' => 'required',
+                    'graduation_year' => 'required',
+                    'gpa' => 'required',
+                    'file_url' => 'required',
+                ]);
+
+                Education::create(array_merge($request->all(), [
+                    'detail_user_id' => $detailUser->id,
+                ]));
+            }
 
             // show json api register success
             return ResponseFormatter::success([
@@ -68,7 +92,7 @@ class UserController extends Controller
     {
         try {
             $request->validate([
-                'email' => 'required|email:rfc,dns',
+                'email' => 'required',
                 'password' => ['required', new Password, 'min:6'],
             ]);
 
@@ -79,11 +103,13 @@ class UserController extends Controller
                 return ResponseFormatter::error('Password is incorrect', 'Login Failed');
             }
 
+            // set cookie
+            $token_result = $user->createToken('Personal Access Token')->plainTextToken;
             return ResponseFormatter::success([
-                'token' => $user->createToken('Personal Access Token')->plainTextToken,
+                'token' => $token_result,
                 'user' => $user,
-                'detailUser' => $detailUser,
                 'token_type' => 'Bearer',
+                'detail_user' => $detailUser,
             ], 'Login Success');
         } catch (Exception $th) {
             return ResponseFormatter::error($th->getMessage(), 'Login Failed');
