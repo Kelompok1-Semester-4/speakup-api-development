@@ -15,7 +15,6 @@ class DiaryController extends Controller
         $id = $request->input('id');
         $diary_type_id = $request->input('diary_type_id');
         $search = $request->input('search');
-        $user_id = $request->input('user_id');
 
         if ($id) {
             return Diary::with(['diaryType', 'detailUser'])->find($id);
@@ -109,5 +108,11 @@ class DiaryController extends Controller
         } catch (Exception $th) {
             return ResponseFormatter::error($th->getMessage());
         }
+    }
+
+    public function show(Request $request)
+    {
+        $user = $request->user();
+        return ResponseFormatter::success(Diary::where('detail_user_id', $user->id)->get());
     }
 }

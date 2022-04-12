@@ -52,5 +52,5 @@ Route::middleware('auth:sanctum')->group(function() {
     Route::post('transaction', [TransactionController::class, 'store']);
     Route::post('transaction/{id}', [TransactionController::class, 'update']);
     // diaries
-    Route::get('diaries', [DiaryController::class, 'index']);
+    Route::get('diaries', [DiaryController::class, 'show']);
 });
