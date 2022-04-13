@@ -37,7 +37,7 @@ Route::middleware('auth:sanctum')->group(function() {
     Route::post('logout', [UserController::class, 'logout']);
     // diaries
     Route::post('diary', [DiaryController::class, 'store']);
-    Route::post('diary/{id}', [DiaryController::class, 'update']);
+    Route::put('diary/{id}', [DiaryController::class, 'update']);
     Route::delete('diary/{id}', [DiaryController::class, 'destroy']);
     // courses
     Route::post('course', [CourseController::class, 'store']);
