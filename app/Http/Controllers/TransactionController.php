@@ -13,12 +13,15 @@ class TransactionController extends Controller
 {
     public function index()
     {
+        $user = Auth::user();
         try {
-            $user = Auth::user();
-            $detail_transaction = DetailTransaction::with('transaction')->where('user_id', $user->id);
-            return ResponseFormatter::success($detail_transaction, 'Detail Transaction retrieved successfully');
-        } catch (Exception $th) {
-            return ResponseFormatter::error($th->getMessage());
+            // get all transaction of that status is success and user_id is $user->id
+            $transactions = Transaction::with([
+                'detail_transaction.course'
+            ])->where('status', 'success')->where('user_id', $user->id)->get();
+            return ResponseFormatter::success($transactions);
+        } catch (Exception $e) {
+            return ResponseFormatter::error($e->getMessage(), 500);
         }
     }
 

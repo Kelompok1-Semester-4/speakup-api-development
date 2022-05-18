@@ -11,6 +11,10 @@ class Role extends Model
 
     protected $fillable = ['name'];
 
+
+    // RELATIONS
+
+    // hasMany - one role can have many users
     public function users()
     {
         return $this->hasMany(User::class);

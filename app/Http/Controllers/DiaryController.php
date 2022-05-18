@@ -45,23 +45,32 @@ class DiaryController extends Controller
                 'content' => 'required|string',
                 'duration_read' => 'required|string',
                 'file' => 'nullable|string',
-                'cover_image' => 'required|string',
+                'cover_image' => 'required|mimes:jpeg,jpg,png,gif',
                 'diary_type_id' => 'required|integer|exists:diary_types,id',
             ]);
 
             $user = Auth::user();
+            if ($request->hasFile('cover_image')) {
+                $file = $request->file('cover_image');
+                $fileName = $file->getClientOriginalName();
+                // generete random name
+                $fileName = uniqid() . '_' . trim($fileName);
+                $file->move(public_path('diaries'), $fileName);
 
-            $diary = new Diary();
-            $diary->title = $request->input('title');
-            $diary->content = $request->input('content');
-            $diary->duration_read = $request->input('duration_read');
-            $diary->file = $request->input('file');
-            $diary->cover_image = $request->input('cover_image');
-            $diary->diary_type_id = $request->input('diary_type_id');
-            $diary->detail_user_id = $user->id;
-            $diary->save();
+                $diary = new Diary();
+                $diary->title = $request->input('title');
+                $diary->content = $request->input('content');
+                $diary->duration_read = $request->input('duration_read');
+                $diary->file = $request->input('file');
+                $diary->cover_image = 'diaries/' . $fileName;
+                $diary->diary_type_id = $request->input('diary_type_id');
+                $diary->detail_user_id = $user->id;
+                $diary->save();
+                return ResponseFormatter::success($diary, 'Diary created successfully');
+            } else{
+                return ResponseFormatter::error('Cover image is required');
+            }
 
-            return ResponseFormatter::success($diary, 'Diary created successfully');
         } catch (Exception $th) {
             return ResponseFormatter::error($th->getMessage());
         }
@@ -71,11 +80,11 @@ class DiaryController extends Controller
     {
         try {
             $request->validate([
-                'title' => 'required|string|unique:diaries,title',
+                'title' => 'required|string',
                 'content' => 'required|string',
-                'duration_read' => 'required|string',
                 'file' => 'nullable|string',
                 'cover_image' => 'required|string',
+                'duration_read' => 'required|string',
                 'diary_type_id' => 'required|integer|exists:diary_types,id',
             ]);
 
@@ -86,8 +95,35 @@ class DiaryController extends Controller
                 return ResponseFormatter::error('You are not authorized to update this diary');
             }
 
-            $diary->update($request->all());
-            return ResponseFormatter::success($diary, 'Diary updated successfully');
+            if($request->hasFile('cover_image')) {
+                $request->validate([
+                    'cover_image' => 'mimes:jpeg,jpg,png,gif',
+                ]);
+                $file = $request->file('cover_image');
+                $fileName = $file->getClientOriginalName();
+                // generete random name
+                $fileName = uniqid() . '_' . trim($fileName);
+                $file->move(public_path('diaries'), $fileName);
+
+                // update
+                $diary->title = $request->input('title');
+                $diary->content = $request->input('content');
+                $diary->duration_read = $request->input('duration_read');
+                $diary->cover_image = 'diaries/' . $fileName;
+                $diary->diary_type_id = $request->input('diary_type_id');
+                $diary->save();
+
+                return ResponseFormatter::success($diary, 'Diary updated successfully');
+            } else {
+                // update without cover image
+                $diary->title = $request->input('title');
+                $diary->content = $request->input('content');
+                $diary->duration_read = $request->input('duration_read');
+                $diary->diary_type_id = $request->input('diary_type_id');
+                $diary->save();
+
+                return ResponseFormatter::success($diary, 'Diary updated successfully');
+            }
         } catch (Exception $th) {
             return ResponseFormatter::error($th->getMessage());
         }

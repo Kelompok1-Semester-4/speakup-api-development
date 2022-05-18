@@ -18,7 +18,7 @@ class UserController extends Controller
     {
         $id = $request->input('id');
         $role_id = $request->input('role_id');
-        
+
         if ($id) {
             return ResponseFormatter::success(User::find($id));
         }
@@ -43,21 +43,28 @@ class UserController extends Controller
                 'role_id' => 'required',
             ]);
 
-            User::create([
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
-                'role_id' => $request->role_id,
-            ]);
+            if ($request->role_id == 1) {
+                User::create([
+                    'email' => $request->email,
+                    'password' => Hash::make($request->password),
+                    'role_id' => $request->role_id,
+                ]);
+                $user = User::with('detailUser')->where('email', $request->email)->first();
+                $token_result = $user->createToken('Personal Access Token')->plainTextToken;
+                // insert data to detail_user table
+                DetailUser::create(array_merge($request->all(), [
+                    'user_id' => $user->id,
+                ]));
 
-            $user = User::with('detailUser')->where('email', $request->email)->first();
-            $token_result = $user->createToken('Personal Access Token')->plainTextToken;
+                $detailUser = DetailUser::where('user_id', $user->id)->first();
 
-            // insert data to detail_user table
-            DetailUser::create(array_merge($request->all(), [
-                'user_id' => $user->id,
-            ]));
-
-            $detailUser = DetailUser::where('user_id', $user->id)->first();
+                // show json api register success
+                return ResponseFormatter::success([
+                    'token' => $token_result,
+                    'user' => $user,
+                    'token_type' => 'Bearer',
+                ], 'Register Success');
+            }
 
             // insert data to education table
             if ($request->role_id == 2) {
@@ -69,20 +76,68 @@ class UserController extends Controller
                     'study_field' => 'required',
                     'graduation_year' => 'required',
                     'gpa' => 'required',
-                    'file_url' => 'required',
+                    // file must be pdf or word
+                    'file_url' => 'required|mimes:pdf,doc,docx',
                 ]);
 
-                Education::create(array_merge($request->all(), [
-                    'detail_user_id' => $detailUser->id,
-                ]));
+                // check if there is a file_url
+                if ($request->hasFile('file_url')) {
+                    $file = $request->file('file_url');
+                    $fileName = $file->getClientOriginalName();
+                    // generete random name
+                    $fileName = uniqid() . '_' . trim($fileName);
+                    $file->move(public_path('education'), $fileName);
+
+                    User::create([
+                        'email' => $request->email,
+                        'password' => Hash::make($request->password),
+                        'role_id' => $request->role_id,
+                    ]);
+                    $user = User::with('detailUser')->where('email', $request->email)->first();
+                    $token_result = $user->createToken('Personal Access Token')->plainTextToken;
+                    // insert data to detail_user table
+                    DetailUser::create(array_merge($request->all(), [
+                        'user_id' => $user->id,
+                    ]));
+
+                    $detailUser = DetailUser::where('user_id', $user->id)->first();
+
+                    Education::create(array_merge($request->all(), [
+                        'detail_user_id' => $detailUser->id,
+                        'file_url' => 'education/' . $fileName,
+                    ]));
+                    // show json api register success
+                    return ResponseFormatter::success([
+                        'token' => $token_result,
+                        'user' => $user,
+                        'token_type' => 'Bearer',
+                    ], 'Register Success');
+                }
             }
 
-            // show json api register success
-            return ResponseFormatter::success([
-                'token' => $token_result,
-                'user' => $user,
-                'token_type' => 'Bearer',
-            ], 'Register Success');
+            if($request->role_id == 3) {
+                User::create([
+                    'email' => $request->email,
+                    'password' => Hash::make($request->password),
+                    'role_id' => $request->role_id,
+                ]);
+
+                $user = User::with('detailUser')->where('email', $request->email)->first();
+                $token_result = $user->createToken('Personal Access Token')->plainTextToken;
+                // insert data to detail_user table
+                DetailUser::create(array_merge($request->all(), [
+                    'user_id' => $user->id,
+                ]));
+
+                $detailUser = DetailUser::where('user_id', $user->id)->first();
+
+                // show json api register success
+                return ResponseFormatter::success([
+                    'token' => $token_result,
+                    'user' => $user,
+                    'token_type' => 'Bearer',
+                ], 'Register Success');
+            }
         } catch (Exception $e) {
             return ResponseFormatter::error($e->getMessage(), 'Register Failed');
         }
