@@ -40,8 +40,11 @@ class UserController extends Controller
                 'address' => 'required',
                 'email' => 'required|unique:users',
                 'password' => ['required', new Password],
-                'role_id' => 'required',
+                'role_id' => 'required|integer',
             ]);
+
+            // parse to integer
+            $request->role_id = intval($request->role_id); 
 
             if ($request->role_id == 1) {
                 User::create([

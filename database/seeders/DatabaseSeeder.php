@@ -24,13 +24,13 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        // DetailUser::factory(10)->create();
-        // Diary::factory(10)->create();
-        // Education::factory(10)->create();
-        // Course::factory(10)->create();
-        // DetailCourse::factory(100)->create();
-        // $this->call([RoleSeeder::class]);
-        // CourseType::factory(2)->create();
-        // DiaryType::factory(4)->create();
+        DetailUser::factory(10)->create();
+        Diary::factory(10)->create();
+        Education::factory(10)->create();
+        Course::factory(10)->create();
+        DetailCourse::factory(100)->create();
+        $this->call([RoleSeeder::class]);
+        CourseType::factory(2)->create();
+        DiaryType::factory(4)->create();
     }
 }

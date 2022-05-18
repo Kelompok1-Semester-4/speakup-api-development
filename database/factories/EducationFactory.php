@@ -18,7 +18,7 @@ class EducationFactory extends Factory
     {
         return [
             'detail_user_id' => $this->faker->numberBetween(1, 10),
-            'level' => $this->faker->randomElement(['SMA', 'SMK', 'S1', 'S2', 'S3']),
+            'level' => $this->faker->randomElement(['SMA', 'SMK', 'S1', 'S2', 'S3', 'D4']),
             'institution' => $this->faker->company,
             'institution_address' => $this->faker->address,
             'major' => $this->faker->jobTitle,

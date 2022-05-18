@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('education', function (Blueprint $table) {
             $table->id();
             $table->integer('detail_user_id')->unsigned();
-            $table->enum('level', ['SMA', 'SMK', 'S1', 'S2', 'S3']);
+            $table->string('level');
             $table->string('institution');
             $table->string('institution_address');
             $table->string('major');
