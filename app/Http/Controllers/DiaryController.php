@@ -81,9 +81,9 @@ class DiaryController extends Controller
         try {
             $request->validate([
                 'title' => 'required|string',
+                'cover_image' => 'nullable|mimes:jpeg,jpg,png,gif',
                 'content' => 'required|string',
                 'file' => 'nullable|string',
-                'cover_image' => 'required|string',
                 'duration_read' => 'required|string',
                 'diary_type_id' => 'required|integer|exists:diary_types,id',
             ]);
@@ -96,9 +96,6 @@ class DiaryController extends Controller
             }
 
             if($request->hasFile('cover_image')) {
-                $request->validate([
-                    'cover_image' => 'mimes:jpeg,jpg,png,gif',
-                ]);
                 $file = $request->file('cover_image');
                 $fileName = $file->getClientOriginalName();
                 // generete random name
