@@ -8,7 +8,7 @@ use App\Models\DetailCourse;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use PhpParser\Node\Expr;
+use Symfony\Component\VarDumper\VarDumper;
 
 class CourseController extends Controller
 {
@@ -198,5 +198,13 @@ class CourseController extends Controller
         } catch (Exception $th) {
             return ResponseFormatter::error($th->getMessage(), $th->getCode(), $th->getTrace());
         }
+    }
+
+    public function conselorCourses(Request $request)
+    {
+        $user = $request->user();
+        $courses = $user->courses()->with(['detailCourse'])->get();
+
+        return ResponseFormatter::success($courses, 'Successfully get courses');
     }
 }

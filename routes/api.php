@@ -40,6 +40,7 @@ Route::middleware('auth:sanctum')->group(function() {
     Route::put('diary/{id}', [DiaryController::class, 'update']);
     Route::delete('diary/{id}', [DiaryController::class, 'destroy']);
     // courses
+    Route::get('conselor-courses', [CourseController::class, 'conselorCourses']);
     Route::post('course', [CourseController::class, 'store']);
     Route::post('course/{id}', [CourseController::class, 'update']);
     Route::delete('course/{id}', [CourseController::class, 'destroy']);
