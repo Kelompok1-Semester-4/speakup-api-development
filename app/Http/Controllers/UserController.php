@@ -194,30 +194,21 @@ class UserController extends Controller
 
     public function update(Request $request)
     {
+        $user = $request->user();
         try {
-            $user = $request->user();
-            $user->update([
-                'email' => $request->email,
-                'role_id' => $request->role_id,
-            ]);
             $detailUser = DetailUser::where('user_id', $user->id)->first();
-            // $detailUser->update([
-            //     "name" => $request->name,
-            //     "gender" => $request->gender,
-            //     "birth" => $request->birth,
-            //     "phone" => $request->phone,
-            //     "photo" => $request->photo,
-            //     "address" => $request->address,
-            //     "job" => $request->job,
-            //     "work_address" => $request->work_address,
-            //     "practice_place_address" => $request->practice_place_address,
-            //     "office_phone_number" => $request->office_phone_number,
-            //     // "is_verified" => $request->is_verified,
-            //     "benefits" => $request->benefits,
-            //     "price" => $request->price  ,
-            // ]);
-            $detailUser->update($request->all());
-
+            if($request->hasFile('photo')) {
+                $file = $request->file('photo');
+                $fileName = $file->getClientOriginalName();
+                // generete random name
+                $fileName = uniqid() . '_' . trim($fileName);
+                $file->move(public_path('users'), $fileName);
+                $detailUser->update(array_merge($request->all(), [
+                    'photo' => 'users/' . $fileName,
+                ]));
+            } else {
+                $detailUser->update($request->all());
+            }
             return ResponseFormatter::success([
                 'user' => $user,
                 'detailUser' => $detailUser,

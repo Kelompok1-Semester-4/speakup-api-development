@@ -15,11 +15,15 @@ class TransactionController extends Controller
     {
         $user = Auth::user();
         try {
-            // get all transaction of that status is success and user_id is $user->id
-            $transactions = Transaction::with([
-                'detail_transaction.course'
-            ])->where('status', 'success')->where('user_id', $user->id)->get();
-            return ResponseFormatter::success($transactions);
+            
+            $detail_transactions = DetailTransaction::with('user', 'course')
+                ->where('user_id', $user->id)
+                ->get();
+            $transaction = Transaction::where('user_id', $user->id)->get();
+            return ResponseFormatter::success([
+                'detail_transactions' => $detail_transactions,
+                'transaction' => $transaction
+            ]);
         } catch (Exception $e) {
             return ResponseFormatter::error($e->getMessage(), 500);
         }
