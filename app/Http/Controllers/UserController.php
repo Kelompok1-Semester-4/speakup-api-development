@@ -7,6 +7,7 @@ use App\Models\DetailUser;
 use App\Models\Education;
 use App\Models\User;
 use Exception;
+use GuzzleHttp\Psr7\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -215,6 +216,18 @@ class UserController extends Controller
             ], 'Update Success');
         } catch (Exception $th) {
             return ResponseFormatter::error($th->getMessage(), 'Update Failed');
+        }
+    }
+
+    public function delete(Request $request, $id)
+    {
+        $user = $request->user();
+        if($user->role->id == 3) {
+            $user = User::find($id);
+            $user->delete();
+            return ResponseFormatter::success('Delete Success');
+        } else {
+            return ResponseFormatter::error('You are not allowed to delete this user', 'Delete Failed');
         }
     }
 }

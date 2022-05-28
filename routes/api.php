@@ -1,9 +1,11 @@
 <?php
 
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\DetailQuizController;
 use App\Http\Controllers\DiaryController;
 use App\Http\Controllers\DiaryTypeController;
 use App\Http\Controllers\EducationController;
+use App\Http\Controllers\QuizController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\UserController;
@@ -26,6 +28,8 @@ Route::get('/educations', [EducationController::class, 'index']);
 Route::get('/roles', [RoleController::class, 'index']);
 Route::get('/users', [UserController::class, 'index']);
 Route::get('/diary-types', [DiaryTypeController::class, 'index']);
+Route::get('quizzes', [QuizController::class, 'index']);
+Route::get('detail-quiz', [DetailQuizController::class, 'index']);
 
 Route::post('/register', [UserController::class, 'register']);
 Route::post('/login', [UserController::class, 'login']);
@@ -35,6 +39,7 @@ Route::middleware('auth:sanctum')->group(function() {
     Route::get('user', [UserController::class, 'fetch']);
     Route::post('user', [UserController::class, 'update']);
     Route::post('logout', [UserController::class, 'logout']);
+    Route::delete('user/{id}', [UserController::class, 'delete']);
     // diaries
     Route::post('diary', [DiaryController::class, 'store']);
     Route::post('diary/edit/{id}', [DiaryController::class, 'update']);
@@ -48,10 +53,19 @@ Route::middleware('auth:sanctum')->group(function() {
     Route::post('detailcourse/{id}', [CourseController::class, 'storeDetailCourse']);
     Route::post('updatedetailcourse/{id}', [CourseController::class, 'updateDetailCourse']);
     Route::delete('deletedetailcourse/{id}', [CourseController::class, 'destroyDetailCourse']);
-    // transactions
     Route::get('transaction', [TransactionController::class, 'index']);
     Route::post('transaction', [TransactionController::class, 'store']);
+    // transactions
     Route::post('transaction/{id}', [TransactionController::class, 'update']);
     // diaries
     Route::get('diaries-user', [DiaryController::class, 'show']);
+
+    // quiz
+    Route::post('quiz/store', [QuizController::class, 'store']);
+    Route::post('quiz/update/{id}', [QuizController::class, 'update']);
+    Route::delete('quiz/{id}', [QuizController::class, 'destroy']);
+    // detail Quiz
+    Route::post('detail-quiz/store', [DetailQuizController::class, 'store']);
+    Route::post('detail-quiz/update/{id}', [DetailQuizController::class, 'update']);
+    Route::delete('detail-quiz/{id}', [DetailQuizController::class, 'destroy']);
 });
