@@ -29,7 +29,8 @@ Route::get('/roles', [RoleController::class, 'index']);
 Route::get('/users', [UserController::class, 'index']);
 Route::get('/diary-types', [DiaryTypeController::class, 'index']);
 Route::get('quizzes', [QuizController::class, 'index']);
-Route::get('detail-quiz', [DetailQuizController::class, 'index']);
+Route::get('detail-quiz/{id}', [DetailQuizController::class, 'index']);
+Route::get('/detail-question/{id}', [DetailQuizController::class, 'fetch']);
 
 Route::post('/register', [UserController::class, 'register']);
 Route::post('/login', [UserController::class, 'login']);

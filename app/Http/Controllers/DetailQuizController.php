@@ -4,20 +4,22 @@ namespace App\Http\Controllers;
 
 use App\Helpers\ResponseFormatter;
 use App\Models\DetailQuiz;
+use App\Models\Quiz;
 use Exception;
 use Illuminate\Http\Request;
 
 class DetailQuizController extends Controller
 {
 
-    public function index(Request $request)
+    public function index($id)
     {
-        $id = $request->input('id');
-        $detailQuiz = DetailQuiz::get();
-        if ($id) {
-            $detailQuiz = DetailQuiz::where('id', $id)->get();
-        }
+        $detailQuiz = Quiz::with('detailQuiz')->find($id);
+        return ResponseFormatter::success($detailQuiz);
+    }
 
+    public function fetch($id)
+    {
+        $detailQuiz = DetailQuiz::find($id);
         return ResponseFormatter::success($detailQuiz);
     }
 
@@ -29,7 +31,7 @@ class DetailQuizController extends Controller
             try {
                 $request->validate([
                     'quiz_id' => 'required|integer|exists:quiz,id',
-                    'title' => 'required|string|max:255|unique:detail_quiz,title',
+                    'title' => 'required|string|max:255',
                     'question1' => 'nullable|string|max:255',
                     'question2' => 'nullable|string|max:255',
                     'question3' => 'nullable|string|max:255',
