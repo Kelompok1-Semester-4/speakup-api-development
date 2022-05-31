@@ -10,6 +10,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
+use PHPUnit\Framework\Constraint\Count;
 
 /*
 |--------------------------------------------------------------------------
@@ -31,6 +32,7 @@ Route::get('/diary-types', [DiaryTypeController::class, 'index']);
 Route::get('quizzes', [QuizController::class, 'index']);
 Route::get('detail-quiz/{id}', [DetailQuizController::class, 'index']);
 Route::get('/detail-question/{id}', [DetailQuizController::class, 'fetch']);
+Route::get('detailsubcourse/{id}', [CourseController::class, 'detailSubCourse']);
 
 Route::post('/register', [UserController::class, 'register']);
 Route::post('/login', [UserController::class, 'login']);
@@ -63,6 +65,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('transaction', [TransactionController::class, 'store']);
     Route::get('conselor-transaction', [TransactionController::class, 'conselorTransaction']);
     Route::get('conselor-transaction/detail/{id}', [TransactionController::class, 'detailConselorTransaction']);
+    Route::post('update-transaction/{id}', [TransactionController::class, 'updateTransaction']);
 
     // diaries
     Route::get('diaries-user', [DiaryController::class, 'show']);

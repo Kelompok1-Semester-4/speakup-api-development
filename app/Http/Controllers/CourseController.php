@@ -8,7 +8,6 @@ use App\Models\DetailCourse;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Symfony\Component\VarDumper\VarDumper;
 
 class CourseController extends Controller
 {
@@ -37,6 +36,12 @@ class CourseController extends Controller
         return response()->json($course);
     }
 
+    public function detailSubCourse($id)
+    {
+        $detailCourse = DetailCourse::where('id', $id)->first();
+        return ResponseFormatter::success($detailCourse);
+    }
+
     public function store(Request $request)
     {
         try {
@@ -45,22 +50,29 @@ class CourseController extends Controller
                 'course_type_id' => 'required|integer|exists:course_types,id',
                 'price' => 'required',
                 'benefit' => 'nullable',
-                'thumbnail' => 'required',
+                'thumbnail' => 'required|mimes:jpeg,jpg,png',
             ]);
 
             $user = Auth::user();
-            $course = Course::create([
-                'detail_user_id' => $user->id,
-                'title' => $request->input('title'),
-                'course_type_id' => $request->input('course_type_id'),
-                'price' => $request->input('price'),
-                'benefit' => $request->input('benefit'),
-                'thumbnail' => $request->input('thumbnail'),
-            ]);
+            if ($request->hasFile('thumbnail')) {
+                $thumbnail = $request->file('thumbnail');
+                $thumbnail_name = time() . '.' . $thumbnail->getClientOriginalExtension();
+                $thumbnail->move(public_path('courses'), $thumbnail_name);
 
-            $course = Course::with(['courseType', 'detailUser', 'detailCourse'])->find($course->id);
+                $course = Course::create([
+                    'detail_user_id' => $user->id,
+                    'title' => $request->input('title'),
+                    'course_type_id' => $request->input('course_type_id'),
+                    'price' => $request->input('price'),
+                    'benefit' => $request->input('benefit'),
+                    'thumbnail' => 'courses/' . $thumbnail_name,
+                ]);
 
-            return ResponseFormatter::success($course, 'Successfully created course');
+                $course = Course::with(['courseType', 'detailUser', 'detailCourse'])->find($course->id);
+                return ResponseFormatter::success($course, 'Successfully created course');
+            } else {
+                return ResponseFormatter::error('Gambar tidak boleh kosong');
+            }
         } catch (Exception $th) {
             return ResponseFormatter::error($th->getMessage());
         }
@@ -74,28 +86,40 @@ class CourseController extends Controller
                 'course_type_id' => 'required|integer|exists:course_types,id',
                 'price' => 'required',
                 'benefit' => 'nullable',
-                'thumbnail' => 'required',
+                'thumbnail' => 'nullable|mimes:jpeg,jpg,png',
             ]);
 
             $user = Auth::user();
-            $course = Course::find($id);
+            if($request->hasFile('thumbnail')) {
+                $thumbnail = $request->file('thumbnail');
+                $thumbnail_name = time() . '.' . $thumbnail->getClientOriginalExtension();
+                $thumbnail->move(public_path('courses'), $thumbnail_name);
 
-            if ($course->detail_user_id != $user->id) {
-                return ResponseFormatter::error('You are not authorized to update this course');
+                $course = Course::find($id);
+                $course->update([
+                    'detail_user_id' => $user->id,
+                    'title' => $request->input('title'),
+                    'course_type_id' => $request->input('course_type_id'),
+                    'price' => $request->input('price'),
+                    'benefit' => $request->input('benefit'),
+                    'thumbnail' => 'courses/' . $thumbnail_name,
+                ]);
+
+                $course = Course::with(['courseType', 'detailUser', 'detailCourse'])->find($course->id);
+                return ResponseFormatter::success($course, 'Successfully updated course');
+            } else {
+                $course = Course::find($id);
+                $course->update([
+                    'detail_user_id' => $user->id,
+                    'title' => $request->input('title'),
+                    'course_type_id' => $request->input('course_type_id'),
+                    'price' => $request->input('price'),
+                    'benefit' => $request->input('benefit'),
+                ]);
+
+                $course = Course::with(['courseType', 'detailUser', 'detailCourse'])->find($course->id);
+                return ResponseFormatter::success($course, 'Successfully updated course');
             }
-
-            $course->detail_user_id = $user->id;
-            $course->title = $request->input('title');
-            $course->course_type_id = $request->input('course_type_id');
-            $course->price = $request->input('price');
-            $course->benefit = $request->input('benefit');
-            $course->thumbnail = $request->input('thumbnail');
-
-            $course->save();
-
-            $course = Course::with(['courseType', 'detailUser', 'detailCourse'])->find($course->id);
-
-            return ResponseFormatter::success($course, 'Successfully updated course');
         } catch (Exception $th) {
             return ResponseFormatter::error($th->getMessage(), $th->getCode(), $th->getTrace());
         }
@@ -122,11 +146,11 @@ class CourseController extends Controller
     {
         try {
             $request->validate([
-                'course_id' => 'required|integer|exists:courses,id',
+                'course_id' => 'required|exists:courses,id',
                 'title' => 'required|string|unique:detail_courses,title',
                 'description' => 'required|string',
                 'video_link' => 'required|string',
-                'cover_image' => 'required|string',
+                'cover_image' => 'required|mimes:jpeg,jpg,png',
                 'duration' => 'required|string',
             ]);
 
@@ -137,20 +161,27 @@ class CourseController extends Controller
                 return ResponseFormatter::error('You are not authorized to update this course');
             }
 
-            $detailCourse = $course->detailCourse()->create([
-                'course_id' => $id,
-                'title' => $request->input('title'),
-                'description' => $request->input('description'),
-                'video_link' => $request->input('video_link'),
-                'cover_image' => $request->input('cover_image'),
-                'duration' => $request->input('duration'),
-            ]);
+            if($request->hasFile('cover_image')) {
+                $cover_image = $request->file('cover_image');
+                $cover_image_name = time() . '.' . $cover_image->getClientOriginalExtension();
+                $cover_image->move(public_path('courses'), $cover_image_name);
 
-            $detailCourse = $course->detailCourse()->find($detailCourse->id);
+                $detail_course = DetailCourse::create([
+                    'course_id' => $request->input('course_id'),
+                    'title' => $request->input('title'),
+                    'description' => $request->input('description'),
+                    'video_link' => $request->input('video_link'),
+                    'cover_image' => 'courses/' . $cover_image_name,
+                    'duration' => $request->input('duration'),
+                ]);
 
-            return ResponseFormatter::success($detailCourse, 'Successfully created detail course');
+                $detail_course = Course::with(['courseType', 'detailUser', 'detailCourse'])->where('id', $id)->first();
+                return ResponseFormatter::success($detail_course, 'Successfully created detail course');
+            } else {
+                return ResponseFormatter::error('Gambar tidak boleh kosong');
+            }
         } catch (Exception $th) {
-            return ResponseFormatter::error($th->getMessage(), $th->getCode(), $th->getTrace());
+            return ResponseFormatter::error($th->getMessage());
         }
     }
 
@@ -158,11 +189,11 @@ class CourseController extends Controller
     {
         try {
             $request->validate([
-                'course_id' => 'required|integer|exists:courses,id',
-                'title' => 'required|string|unique:detail_courses,title',
+                'course_id' => 'required|exists:courses,id',
+                'title' => 'required|unique:detail_courses,title',
                 'description' => 'required|string',
                 'video_link' => 'required|string',
-                'cover_image' => 'required|string',
+                'cover_image' => 'nullable|mimes:jpeg,jpg,png',
                 'duration' => 'required|string',
             ]);
 
@@ -173,17 +204,39 @@ class CourseController extends Controller
                 return ResponseFormatter::error('You are not authorized to update this course');
             }
 
-            $detailCourse->course_id = $request->input('course_id');
-            $detailCourse->title = $request->input('title');
-            $detailCourse->description = $request->input('description');
-            $detailCourse->video_link = $request->input('video_link');
-            $detailCourse->cover_image = $request->input('cover_image');
-            $detailCourse->duration = $request->input('duration');
-            $detailCourse->save();
+            if($request->hasFile('cover_image')) {
+                $cover_image = $request->file('cover_image');
+                $cover_image_name = time() . '.' . $cover_image->getClientOriginalExtension();
+                $cover_image->move(public_path('courses'), $cover_image_name);
 
-            return ResponseFormatter::success($detailCourse, 'Successfully updated detail course');
+                $detail_course = DetailCourse::find($id);
+                $detail_course->update([
+                    'course_id' => $request->input('course_id'),
+                    'title' => $request->input('title'),
+                    'description' => $request->input('description'),
+                    'video_link' => $request->input('video_link'),
+                    'cover_image' => 'courses/' . $cover_image_name,
+                    'duration' => $request->input('duration'),
+                ]);
+
+                $detail_course = Course::with(['courseType', 'detailUser', 'detailCourse'])->where('id', $detailCourse->course_id)->first();
+                return ResponseFormatter::success($detail_course, 'Successfully updated detail course');
+            } else {
+                $detail_course = DetailCourse::find($id);
+                $detail_course->update([
+                    'course_id' => $request->input('course_id'),
+                    'title' => $request->input('title'),
+                    'description' => $request->input('description'),
+                    'video_link' => $request->input('video_link'),
+                    'duration' => $request->input('duration'),
+                ]);
+
+                $detail_course = Course::with(['courseType', 'detailUser', 'detailCourse'])->where('id', $detailCourse->course_id)->first();
+                return ResponseFormatter::success($detail_course, 'Successfully updated detail course');
+            }
+
         } catch (Exception $th) {
-            return ResponseFormatter::error($th->getMessage(), $th->getCode(), $th->getTrace());
+            return ResponseFormatter::error($th->getMessage());
         }
     }
 

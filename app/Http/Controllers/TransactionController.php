@@ -109,4 +109,13 @@ class TransactionController extends Controller
         ])->where('detail_transaction_id', $id)->first();
         return ResponseFormatter::success($transaction);
     }
+
+    public function updateTransaction($id)
+    {
+        $transaction = Transaction::find($id);
+        $transaction->update([
+            'status' => 'SUCCESS',
+        ]);
+        return ResponseFormatter::success($transaction);
+    }
 }
