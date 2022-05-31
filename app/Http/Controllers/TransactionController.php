@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\ResponseFormatter;
+use App\Models\Course;
 use App\Models\DetailTransaction;
 use App\Models\Transaction;
 use Exception;
@@ -15,7 +16,7 @@ class TransactionController extends Controller
     {
         $user = Auth::user();
         try {
-            
+
             $detail_transactions = DetailTransaction::with('user', 'course')
                 ->where('user_id', $user->id)
                 ->get();
@@ -67,7 +68,7 @@ class TransactionController extends Controller
         try {
             $user = Auth::user();
             $transaction = Transaction::find($id);
-            
+
             if ($transaction->user_id != $user->id) {
                 return ResponseFormatter::error('You are not authorized to update this transaction');
             }
@@ -81,9 +82,31 @@ class TransactionController extends Controller
             ]);
 
             return ResponseFormatter::success($transaction, 'Transaction updated successfully');
-
-        } catch(Exception $th) {
+        } catch (Exception $th) {
             return ResponseFormatter::error($th->getMessage());
         }
+    }
+
+    public function conselorTransaction()
+    {
+        $user = Auth::user();
+        $user_id = $user->id;
+        $detail_transaction = DetailTransaction::with([
+            'user.detailUser',
+            'course',
+        ])->whereHas('course', function ($query) use ($user_id) {
+            $query->where('detail_user_id', $user_id);
+        })->get();
+
+        return ResponseFormatter::success($detail_transaction);
+    }
+
+    public function detailConselorTransaction($id)
+    {
+        $transaction = Transaction::with([
+            'detail_transaction.user.detailUser',
+            'detail_transaction.course',
+        ])->where('detail_transaction_id', $id)->first();
+        return ResponseFormatter::success($transaction);
     }
 }

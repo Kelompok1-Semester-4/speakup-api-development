@@ -30,6 +30,27 @@ class UserController extends Controller
         }
     }
 
+    public function updateVerification(Request $request, $id)
+    {
+        try {
+            DetailUser::where('user_id', $id)->update([
+                'is_verified' => 1
+            ]);
+            return ResponseFormatter::success(DetailUser::find($id));
+        } catch (Exception $th) {
+            return ResponseFormatter::error([
+                'message' => $th->getMessage(),
+                'code' => $th->getCode()
+            ]);
+        }
+    }
+
+    public function detailConselor($id)
+    {
+        $user = DetailUser::with('education')->find($id);
+        return ResponseFormatter::success($user);
+    }
+
     public function register(Request $request)
     {
         try {

@@ -35,8 +35,10 @@ Route::get('/detail-question/{id}', [DetailQuizController::class, 'fetch']);
 Route::post('/register', [UserController::class, 'register']);
 Route::post('/login', [UserController::class, 'login']);
 
-Route::middleware('auth:sanctum')->group(function() {
+Route::middleware('auth:sanctum')->group(function () {
     // users
+    Route::get('detail-conselor/{id}', [UserController::class, 'detailConselor']);
+    Route::post('update-verification/{id}', [UserController::class, 'updateVerification']);
     Route::get('user', [UserController::class, 'fetch']);
     Route::post('user', [UserController::class, 'update']);
     Route::post('logout', [UserController::class, 'logout']);
@@ -54,10 +56,14 @@ Route::middleware('auth:sanctum')->group(function() {
     Route::post('detailcourse/{id}', [CourseController::class, 'storeDetailCourse']);
     Route::post('updatedetailcourse/{id}', [CourseController::class, 'updateDetailCourse']);
     Route::delete('deletedetailcourse/{id}', [CourseController::class, 'destroyDetailCourse']);
-    Route::get('transaction', [TransactionController::class, 'index']);
-    Route::post('transaction', [TransactionController::class, 'store']);
+
     // transactions
+    Route::get('transaction', [TransactionController::class, 'index']);
     Route::post('transaction/{id}', [TransactionController::class, 'update']);
+    Route::post('transaction', [TransactionController::class, 'store']);
+    Route::get('conselor-transaction', [TransactionController::class, 'conselorTransaction']);
+    Route::get('conselor-transaction/detail/{id}', [TransactionController::class, 'detailConselorTransaction']);
+
     // diaries
     Route::get('diaries-user', [DiaryController::class, 'show']);
 
