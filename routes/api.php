@@ -42,7 +42,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('detail-conselor/{id}', [UserController::class, 'detailConselor']);
     Route::post('update-verification/{id}', [UserController::class, 'updateVerification']);
     Route::get('user', [UserController::class, 'fetch']);
-    Route::post('user', [UserController::class, 'update']);
+    Route::post('user/update', [UserController::class, 'update']);
     Route::post('logout', [UserController::class, 'logout']);
     Route::delete('user/{id}', [UserController::class, 'delete']);
     // diaries

@@ -217,6 +217,18 @@ class UserController extends Controller
     public function update(Request $request)
     {
         $user = $request->user();
+        $request->validate([
+            'name' => 'nullable',
+            'gender' => 'nullable',
+            'birth' => 'nullable',
+            'address' => 'nullable',
+            'job' => 'nullable',
+            'work_address' => 'nullable',
+            'practice_place_address' => 'nullable',
+            'office_phone_number' => 'nullable',
+            'benefits' => 'nullable',
+            'price' => 'nullable',
+        ]);
         try {
             $detailUser = DetailUser::where('user_id', $user->id)->first();
             if($request->hasFile('photo')) {
