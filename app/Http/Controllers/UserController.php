@@ -248,7 +248,7 @@ class UserController extends Controller
                 'detailUser' => $detailUser,
             ], 'Update Success');
         } catch (Exception $th) {
-            return ResponseFormatter::error($th->getMessage(), 'Update Failed');
+            return ResponseFormatter::error($th->getMessage());
         }
     }
 
