@@ -29,6 +29,7 @@ return new class extends Migration
             $table->integer('is_verified')->default(0);
             $table->string('benefits')->default("");
             $table->float('price')->default(0);
+            $table->string('credit_card_number')->nullable();
             $table->timestamps();
         });
     }

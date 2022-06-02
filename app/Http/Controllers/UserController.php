@@ -63,6 +63,7 @@ class UserController extends Controller
                 'email' => 'required|unique:users',
                 'password' => ['required', new Password],
                 'role_id' => 'required|integer',
+                'credit_card_number' => 'nullable|string',
             ]);
 
             // parse to integer

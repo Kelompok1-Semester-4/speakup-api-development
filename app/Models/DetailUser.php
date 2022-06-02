@@ -23,7 +23,8 @@ class DetailUser extends Model
         'office_phone_number',
         'is_verified',
         'benefits',
-        'price'
+        'price',
+        'credit_card_number',
     ];
 
     public function user()
