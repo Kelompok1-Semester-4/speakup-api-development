@@ -31,6 +31,6 @@ class DatabaseSeeder extends Seeder
         // DetailCourse::factory(100)->create();
         $this->call([RoleSeeder::class]);
         CourseType::factory(2)->create();
-        // DiaryType::factory(4)->create();
+        DiaryType::factory(4)->create();
     }
 }
