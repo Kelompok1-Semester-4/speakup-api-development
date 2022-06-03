@@ -165,7 +165,7 @@ class UserController extends Controller
                 ], 'Register Success');
             }
         } catch (Exception $e) {
-            return ResponseFormatter::error($e->getMessage(), 'Register Failed');
+            return ResponseFormatter::error($e->getMessage());
         }
     }
 
