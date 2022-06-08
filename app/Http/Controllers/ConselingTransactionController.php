@@ -20,14 +20,21 @@ class ConselingTransactionController extends Controller
         return ResponseFormatter::success($conseling_transaction);
     }
 
-    public function getUserConselingTransaction()
+    public function getUserConselingTransaction(Request $request)
     {
         $user = Auth::user();
+        $id = $request->id;
+
+        if ($id) {
+            $conseling_transaction = ConselingTransaction::with(['user'])->where('id', $id)->first();
+            return ResponseFormatter::success($conseling_transaction);
+        }
+
         if ($user->role->id == 1) {
             $conseling_transaction = ConselingTransaction::with(['user', 'conselor'])->where('user_id', $user->id)->get();
             return ResponseFormatter::success($conseling_transaction);
         } else if ($user->role->id == 2) {
-            $conseling_transaction = ConselingTransaction::with(['user','conselor'])->where('conselor_id', $user->id)->get();
+            $conseling_transaction = ConselingTransaction::with(['user', 'conselor'])->where('conselor_id', $user->id)->get();
             return ResponseFormatter::success($conseling_transaction);
         }
     }
@@ -37,8 +44,8 @@ class ConselingTransactionController extends Controller
         $user = $request->user_id;
         $conselor = Auth::user();
         $price = $request->price;
-        $pay_status = 'pending';
-        $conseling_status = 'pending';
+        $pay_status = $request->pay_status;
+        $conseling_status = $request->conseling_status;
         $start_time = $request->start_time;
         $end_time = $request->end_time;
         $conseling_transaction = ConselingTransaction::create([
@@ -55,24 +62,33 @@ class ConselingTransactionController extends Controller
 
     public function update(Request $request, $id)
     {
-        $user = $request->user_id;
-        $conselor = $request->user();
-        $price = $request->price;
+        $request->validate([
+            'pay_status' => 'required',
+            'conseling_status' => 'required',
+            'start_time' => 'required',
+            'end_time' => 'required',
+        ]);
         $pay_status = $request->pay_status;
         $conseling_status = $request->conseling_status;
         $start_time = $request->start_time;
         $end_time = $request->end_time;
-        $conseling_transaction = ConselingTransaction::find($id);
-        $conseling_transaction->update([
-            'user_id' => $user,
-            'conselor_id' => $conselor->id,
-            'price' => $price,
-            'pay_status' => $pay_status,
-            'conseling_status' => $conseling_status,
-            'start_time' => $start_time,
-            'end_time' => $end_time,
-        ]);
-        return ResponseFormatter::success($conseling_transaction, 'Conseling transaction updated successfully');
+        try {
+            $conseling_transaction = ConselingTransaction::find($id);
+            if ($conseling_transaction) {
+                $conseling_transaction->update([
+                    'pay_status' => $pay_status,
+                    'conseling_status' => $conseling_status,
+                    'start_time' => $start_time,
+                    'end_time' => $end_time,
+                ]);
+                return ResponseFormatter::success($conseling_transaction, 'Conseling transaction updated successfully');
+            } else {
+                return ResponseFormatter::error('Conseling transaction not found');
+            }
+            return ResponseFormatter::success($conseling_transaction, 'Conseling transaction updated successfully');
+        } catch (Exception $th) {
+            return ResponseFormatter::error($th->getMessage());
+        }
     }
 
     public function destroy(Request $request, $id)

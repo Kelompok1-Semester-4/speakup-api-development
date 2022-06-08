@@ -35,6 +35,8 @@ class UserController extends Controller
                 }
             )->get();
         }
+
+        return User::with('detailUser')->where('role_id', 1)->get();
     }
 
     public function detail($id)
