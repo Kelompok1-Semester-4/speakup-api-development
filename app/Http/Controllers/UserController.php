@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\ResponseFormatter;
+use App\Models\Course;
+use App\Models\DetailTransaction;
 use App\Models\DetailUser;
+use App\Models\Diary;
 use App\Models\Education;
 use App\Models\User;
 use Exception;
-use GuzzleHttp\Psr7\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -26,7 +28,22 @@ class UserController extends Controller
 
         if ($role_id) {
             // get detail user data by role_id
-            return User::with('detailUser')->where('role_id', $role_id)->get();
+            return User::with('detailUser')->where('role_id', $role_id)->whereHas(
+                'detailUser',
+                function ($query) {
+                    $query->where('is_verified', 1);
+                }
+            )->get();
+        }
+    }
+
+    public function detail($id)
+    {
+        $user = User::with('detailUser')->find($id);
+        if (!$user) {
+            return ResponseFormatter::error('User not found');
+        } else {
+            return ResponseFormatter::success($user);
         }
     }
 
@@ -67,7 +84,7 @@ class UserController extends Controller
             ]);
 
             // parse to integer
-            $request->role_id = intval($request->role_id); 
+            $request->role_id = intval($request->role_id);
 
             if ($request->role_id == 1) {
                 User::create([
@@ -141,7 +158,7 @@ class UserController extends Controller
                 }
             }
 
-            if($request->role_id == 3) {
+            if ($request->role_id == 3) {
                 User::create([
                     'email' => $request->email,
                     'password' => Hash::make($request->password),
@@ -232,7 +249,7 @@ class UserController extends Controller
         ]);
         try {
             $detailUser = DetailUser::where('user_id', $user->id)->first();
-            if($request->hasFile('photo')) {
+            if ($request->hasFile('photo')) {
                 $file = $request->file('photo');
                 $fileName = $file->getClientOriginalName();
                 // generete random name
@@ -256,7 +273,7 @@ class UserController extends Controller
     public function delete(Request $request, $id)
     {
         $user = $request->user();
-        if($user->role->id == 3) {
+        if ($user->role->id == 3) {
             $user = User::find($id);
             $user->delete();
             return ResponseFormatter::success('Delete Success');
@@ -264,4 +281,17 @@ class UserController extends Controller
             return ResponseFormatter::error('You are not allowed to delete this user', 'Delete Failed');
         }
     }
+
+    public function allDetailConselor($id)
+    {
+        // get courses by user id
+        $courses = Course::with(['detailCourse', 'detailUser'])->where('detail_user_id', $id)->get();
+        // get diaries by user id
+        $diaries = Diary::with('detailUser')->where('detail_user_id', $id)->get();
+        return ResponseFormatter::success([
+            'courses' => $courses,
+            'diaries' => $diaries,
+        ], 'Fetch Success');
+    }
+
 }

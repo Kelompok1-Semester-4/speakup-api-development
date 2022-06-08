@@ -47,5 +47,8 @@ class DetailUser extends Model
         return $this->hasMany(Course::class);
     }
 
-    
+    public function conselingTransaction()
+    {
+        return $this->hasMany(ConselingTransaction::class);
+    }
 }
