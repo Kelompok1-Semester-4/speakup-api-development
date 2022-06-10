@@ -21,19 +21,21 @@ class UserController extends Controller
     {
         $id = $request->input('id');
         $role_id = $request->input('role_id');
+        $is_verified = $request->input('is_verified');
 
         if ($id) {
             return ResponseFormatter::success(User::find($id));
         }
 
+        if ($role_id && $is_verified == 1) {
+            return User::with('detailUser')->where('role_id', $role_id)->whereHas('detailUser', function ($query) use ($is_verified) {
+                $query->where('is_verified', 1);
+            })->get();
+        }
+
         if ($role_id) {
             // get detail user data by role_id
-            return User::with('detailUser')->where('role_id', $role_id)->whereHas(
-                'detailUser',
-                function ($query) {
-                    $query->where('is_verified', 1);
-                }
-            )->get();
+            return User::with('detailUser')->where('role_id', $role_id)->get();
         }
 
         return User::with('detailUser')->where('role_id', 1)->get();
@@ -295,5 +297,4 @@ class UserController extends Controller
             'diaries' => $diaries,
         ], 'Fetch Success');
     }
-
 }
