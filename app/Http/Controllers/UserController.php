@@ -239,21 +239,28 @@ class UserController extends Controller
     public function update(Request $request)
     {
         $user = $request->user();
-        $request->validate([
-            'name' => 'nullable',
-            'gender' => 'nullable',
-            'birth' => 'nullable',
-            'address' => 'nullable',
-            'job' => 'nullable',
-            'work_address' => 'nullable',
-            'practice_place_address' => 'nullable',
-            'office_phone_number' => 'nullable',
-            'benefits' => 'nullable',
-            'price' => 'nullable',
-        ]);
         try {
+            $request->validate([
+                'name' => 'required',
+                'gender' => 'required',
+                'birth' => 'required',
+                'address' => 'required',
+                'job' => 'required',
+                'work_address' => 'required',
+                'practice_place_address' => 'required',
+                'office_phone_number' => 'required',
+                'benefits' => 'required',
+                'price' => 'required',
+            ]);
             $detailUser = DetailUser::where('user_id', $user->id)->first();
             if ($request->hasFile('photo')) {
+                // delete old photo
+                if ($detailUser->photo != null) {
+                    $old_photo = public_path($detailUser->photo);
+                    if (file_exists($old_photo)) {
+                        unlink($old_photo);
+                    }
+                }
                 $file = $request->file('photo');
                 $fileName = $file->getClientOriginalName();
                 // generete random name
