@@ -22,7 +22,6 @@ use Illuminate\Support\Facades\Route;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-
 Route::get('/courses', [CourseController::class, 'index']);
 Route::get('/diaries', [DiaryController::class, 'index']);
 Route::get('/educations', [EducationController::class, 'index']);
@@ -83,4 +82,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('conseling-transaction/store', [ConselingTransactionController::class, 'store']);
     Route::post('conseling-transaction/update/{id}', [ConselingTransactionController::class, 'update']);
     Route::delete('conseling-transaction/delete/{id}', [ConselingTransactionController::class, 'destroy']);
+    // download file_url education
 });

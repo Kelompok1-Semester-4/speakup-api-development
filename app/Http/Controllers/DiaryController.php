@@ -48,7 +48,6 @@ class DiaryController extends Controller
                 'cover_image' => 'required|mimes:jpeg,jpg,png,gif',
                 'diary_type_id' => 'required|integer|exists:diary_types,id',
             ]);
-
             $user = Auth::user();
             if ($request->hasFile('cover_image')) {
                 $file = $request->file('cover_image');
@@ -81,7 +80,6 @@ class DiaryController extends Controller
         try {
             $request->validate([
                 'title' => 'required|string',
-                'cover_image' => 'nullable|mimes:jpeg,jpg,png,gif',
                 'content' => 'required|string',
                 'file' => 'nullable|string',
                 'duration_read' => 'required|string',
@@ -96,6 +94,14 @@ class DiaryController extends Controller
             }
 
             if($request->hasFile('cover_image')) {
+                $request->validate([
+                    'cover_image' => 'mimes:jpeg,jpg,png,gif',
+                ]);
+                // delete old cover image
+                $oldFile = $diary->cover_image;
+                if (file_exists(public_path($oldFile))) {
+                    unlink(public_path($oldFile));
+                }
                 $file = $request->file('cover_image');
                 $fileName = $file->getClientOriginalName();
                 // generete random name
@@ -136,6 +142,11 @@ class DiaryController extends Controller
                 return ResponseFormatter::error('You are not authorized to delete this diary');
             }
 
+            // delete old cover image
+            $oldFile = $diary->cover_image;
+            if (file_exists(public_path($oldFile))) {
+                unlink(public_path($oldFile));
+            }
             $diary->delete();
             return ResponseFormatter::success($diary, 'Diary deleted successfully');
         } catch (Exception $th) {

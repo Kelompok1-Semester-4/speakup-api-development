@@ -13,6 +13,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Fortify\Rules\Password;
 
 class UserController extends Controller
@@ -35,7 +36,12 @@ class UserController extends Controller
 
         if ($role_id) {
             // get detail user data by role_id
-            return User::with('detailUser')->where('role_id', $role_id)->get();
+            return User::with('detailUser')->where('role_id', $role_id)->whereHas(
+                'detailUser',
+                function ($query) use ($is_verified) {
+                    $query->where('is_verified', 1);
+                }
+            )->get();
         }
 
         return User::with('detailUser')->where('role_id', 1)->get();
@@ -194,7 +200,7 @@ class UserController extends Controller
     {
         try {
             $request->validate([
-                'email' => 'required',
+                'email' => 'required|string|email',
                 'password' => ['required', new Password, 'min:6'],
             ]);
 
@@ -245,15 +251,25 @@ class UserController extends Controller
                 'gender' => 'required',
                 'birth' => 'required',
                 'address' => 'required',
+                'phone' => 'required',
                 'job' => 'required',
-                'work_address' => 'required',
-                'practice_place_address' => 'required',
-                'office_phone_number' => 'required',
-                'benefits' => 'required',
-                'price' => 'required',
             ]);
+            if ($user->role->id == 2) {
+                $request->validate([
+                    'work_address' => 'required',
+                    'practice_place_address' => 'required',
+                    'office_phone_number' => 'required',
+                    'benefits' => 'required',
+                    'price' => 'required',
+                ]);
+            }
             $detailUser = DetailUser::where('user_id', $user->id)->first();
             if ($request->hasFile('photo')) {
+                $request->validate([
+                    'photo' => 'mimes:jpeg,png,jpg,gif,svg',
+                ], [
+                    'photo.mimes' => 'Photo must be jpeg,png,jpg,gif,svg',
+                ]);
                 // delete old photo
                 if ($detailUser->photo != null) {
                     $old_photo = public_path($detailUser->photo);

@@ -82,15 +82,23 @@ class CourseController extends Controller
     {
         try {
             $request->validate([
-                'title' => 'required|string|unique:courses,title',
+                'title' => 'required|unique:courses,title',
                 'course_type_id' => 'required|integer|exists:course_types,id',
                 'price' => 'required',
                 'benefit' => 'nullable',
-                'thumbnail' => 'nullable|mimes:jpeg,jpg,png',
             ]);
 
             $user = Auth::user();
             if($request->hasFile('thumbnail')) {
+                $request->validate([
+                    'thumbnail' => 'mimes:jpeg,jpg,png',
+                ]);
+                // delete old thumbnail
+                $course = Course::find($id);
+                $thumbnail_path = public_path($course->thumbnail);
+                if (file_exists($thumbnail_path)) {
+                    unlink($thumbnail_path);
+                }
                 $thumbnail = $request->file('thumbnail');
                 $thumbnail_name = time() . '.' . $thumbnail->getClientOriginalExtension();
                 $thumbnail->move(public_path('courses'), $thumbnail_name);
@@ -121,7 +129,7 @@ class CourseController extends Controller
                 return ResponseFormatter::success($course, 'Successfully updated course');
             }
         } catch (Exception $th) {
-            return ResponseFormatter::error($th->getMessage(), $th->getCode(), $th->getTrace());
+            return ResponseFormatter::error($th->getMessage());
         }
     }
 
@@ -190,10 +198,9 @@ class CourseController extends Controller
         try {
             $request->validate([
                 'course_id' => 'required|exists:courses,id',
-                'title' => 'required|unique:detail_courses,title',
+                'title' => 'required',
                 'description' => 'required|string',
                 'video_link' => 'required|string',
-                'cover_image' => 'nullable|mimes:jpeg,jpg,png',
                 'duration' => 'required|string',
             ]);
 
@@ -205,6 +212,15 @@ class CourseController extends Controller
             }
 
             if($request->hasFile('cover_image')) {
+                $request->validate([
+                    'cover_image' => 'mimes:jpeg,jpg,png',
+                ]);
+                // delete old cover_image
+                $course = DetailCourse::find($id);
+                $cover_image_path = public_path($course->cover_image);
+                if (file_exists($cover_image_path)) {
+                    unlink($cover_image_path);
+                }
                 $cover_image = $request->file('cover_image');
                 $cover_image_name = time() . '.' . $cover_image->getClientOriginalExtension();
                 $cover_image->move(public_path('courses'), $cover_image_name);
@@ -245,6 +261,11 @@ class CourseController extends Controller
         try {
             $user = Auth::user();
             $detailCourse = DetailCourse::find($id);
+            // delete old cover_image
+            $cover_image_path = public_path($detailCourse->cover_image);
+            if (file_exists($cover_image_path)) {
+                unlink($cover_image_path);
+            }
             $detailCourse->delete();
 
             return ResponseFormatter::success('Successfully deleted detail course');

@@ -63,12 +63,18 @@ class QuizController extends Controller
             try {
                 $request->validate([
                     'title' => 'required|string|max:255',
-                    'photo' => 'image|mimes:jpeg,png,jpg',
                     'description' => 'required|string|max:255',
                 ]);
 
                 $quiz = Quiz::find($id);
                 if ($request->hasFile('photo')) {
+                    $request->validate([
+                        'photo' => 'image|mimes:jpeg,png,jpg',
+                    ]);
+                    // delete old photo
+                    if (file_exists(public_path($quiz->photo))) {
+                        unlink(public_path($quiz->photo));
+                    }
                     $photo = $request->file('photo');
                     $photoName = time() . '.' . $photo->getClientOriginalExtension();
                     $photo->move(public_path('quiz'), $photoName);
@@ -98,6 +104,10 @@ class QuizController extends Controller
         if($user->role->id == 3) {
             try {
                 $quiz = Quiz::find($id);
+                // delete old photo
+                if (file_exists(public_path($quiz->photo))) {
+                    unlink(public_path($quiz->photo));
+                }
                 $quiz->delete();
                 return ResponseFormatter::success('Quiz successfully deleted');
             } catch (Exception $th) {
