@@ -30,6 +30,7 @@ Route::get('/users', [UserController::class, 'index']);
 Route::get('/users/detail/{id}', [UserController::class, 'detail']);
 Route::get('/diary-types', [DiaryTypeController::class, 'index']);
 Route::get('quizzes', [QuizController::class, 'index']);
+Route::get('/public-conselor', [UserController::class, 'getPublicConselor']);
 Route::get('detail-quiz/{id}', [DetailQuizController::class, 'index']);
 Route::get('/detail-question/{id}', [DetailQuizController::class, 'fetch']);
 Route::get('detailsubcourse/{id}', [CourseController::class, 'detailSubCourse']);

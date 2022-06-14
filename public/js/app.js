@@ -75,7 +75,7 @@ function elementBoundEffect(el) {
   let cleanup2 = () => {
   };
   let wrappedEffect = (callback) => {
-    let effectReference = effect(callback);
+    let effectReference = effect(callback);php[]
     if (!el._x_effects) {
       el._x_effects = new Set();
       el._x_runEffects = () => {
