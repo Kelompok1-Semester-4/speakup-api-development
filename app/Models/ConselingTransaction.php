@@ -18,6 +18,7 @@ class ConselingTransaction extends Model
         'end_time',
         'pay_status',
         'conseling_status',
+        'conseling_date',
     ];
 
     public function user()

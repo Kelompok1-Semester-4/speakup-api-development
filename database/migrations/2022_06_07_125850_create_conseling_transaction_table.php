@@ -22,6 +22,7 @@ return new class extends Migration
             $table->time('end_time');
             $table->string('pay_status'); // success, pending, failed
             $table->string('conseling_status'); // pending, success
+            $table->date('conseling_date');
             $table->timestamps();
         });
     }
