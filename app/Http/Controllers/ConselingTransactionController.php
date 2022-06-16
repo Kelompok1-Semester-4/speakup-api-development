@@ -48,6 +48,7 @@ class ConselingTransactionController extends Controller
         $conseling_status = $request->conseling_status;
         $start_time = $request->start_time;
         $end_time = $request->end_time;
+        $conseling_date = $request->conseling_date;
         $conseling_transaction = ConselingTransaction::create([
             'user_id' => $user,
             'conselor_id' => $conselor->id,
@@ -56,6 +57,7 @@ class ConselingTransactionController extends Controller
             'conseling_status' => $conseling_status,
             'start_time' => $start_time,
             'end_time' => $end_time,
+            'conseling_date' => $conseling_date,
         ]);
         return ResponseFormatter::success($conseling_transaction, 'Conseling transaction created successfully');
     }
@@ -67,11 +69,13 @@ class ConselingTransactionController extends Controller
             'conseling_status' => 'required',
             'start_time' => 'required',
             'end_time' => 'required',
+            'conseling_date' => 'required',
         ]);
         $pay_status = $request->pay_status;
         $conseling_status = $request->conseling_status;
         $start_time = $request->start_time;
         $end_time = $request->end_time;
+        $conseling_date = $request->conseling_date;
         try {
             $conseling_transaction = ConselingTransaction::find($id);
             if ($conseling_transaction) {
@@ -80,6 +84,7 @@ class ConselingTransactionController extends Controller
                     'conseling_status' => $conseling_status,
                     'start_time' => $start_time,
                     'end_time' => $end_time,
+                    'conseling_date' => $conseling_date,
                 ]);
                 return ResponseFormatter::success($conseling_transaction, 'Conseling transaction updated successfully');
             } else {
